@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brute Force Algorithm Simulations</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #60708b;
+      --paper: #f7f9fc;
+      --card: #ffffff;
+      --line: #dce4ef;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --orange: #ea580c;
+      --orange-soft: #ffedd5;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+      --shadow: 0 14px 38px rgba(31, 49, 82, .10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(135deg, #eef5ff 0%, var(--paper) 42%, #fff7ed 100%);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 44px 0 22px; text-align: center; }
+    h1 { margin: 0 0 8px; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.04em; }
+    .lead { max-width: 760px; margin: 0 auto; color: var(--muted); font-size: 1.08rem; }
+    .tabs {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+      margin: 26px 0 22px;
+    }
+    button, input, select { font: inherit; }
+    button {
+      border: 0; border-radius: 10px; padding: 10px 15px; cursor: pointer;
+      background: #e9eef7; color: var(--ink); font-weight: 700; transition: .18s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(.98); }
+    button.primary { background: var(--blue); color: white; }
+    button.success { background: var(--green); color: white; }
+    button.warning { background: var(--orange); color: white; }
+    .tab.active { background: var(--ink); color: white; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: rgba(255,255,255,.92); border: 1px solid var(--line);
+      border-radius: 18px; box-shadow: var(--shadow); padding: 24px; margin-bottom: 22px;
+    }
+    .intro { display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; align-items: center; }
+    h2, h3 { margin: 0 0 8px; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.05rem; }
+    .muted { color: var(--muted); }
+    .idea {
+      border-left: 5px solid var(--blue); background: var(--blue-soft);
+      padding: 14px 16px; border-radius: 10px;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 18px 0;
+    }
+    .field { display: grid; gap: 5px; min-width: 150px; }
+    label { font-size: .83rem; color: var(--muted); font-weight: 700; }
+    input, select {
+      border: 1px solid #c8d3e2; border-radius: 9px; padding: 9px 10px;
+      background: white; color: var(--ink);
+    }
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 18px; }
+    .stat { padding: 9px 12px; border-radius: 10px; background: #f0f4f9; min-width: 130px; }
+    .stat strong { display: block; font-size: 1.2rem; }
+    .stat span { color: var(--muted); font-size: .8rem; }
+    .visual { min-height: 250px; overflow-x: auto; padding: 16px; background: #fbfdff; border: 1px solid var(--line); border-radius: 12px; }
+    .status { margin: 12px 0 0; color: var(--muted); min-height: 27px; }
+    .string-line { display: flex; align-items: center; gap: 6px; margin: 20px 0; }
+    .string-label { width: 75px; font-weight: 700; color: var(--muted); }
+    .letter {
+      display: grid; place-items: center; width: 42px; height: 42px; border-radius: 7px;
+      border: 2px solid #b9c9df; background: white; font-weight: 800; font-size: 1.2rem;
+    }
+    .letter.active { background: #fef3c7; border-color: #f59e0b; }
+    .letter.match { background: var(--green-soft); border-color: var(--green); color: #166534; }
+    .letter.mismatch { background: var(--red-soft); border-color: var(--red); color: #991b1b; }
+    .grid-table { border-collapse: collapse; margin: 4px auto; }
+    .grid-table th, .grid-table td { min-width: 56px; border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
+    .grid-table th { background: #eef3f9; color: var(--muted); font-size: .85rem; }
+    .grid-table td.try { background: #fef3c7; }
+    .grid-table td.best { background: var(--green-soft); color: #166534; font-weight: 800; }
+    .grid-table td.current { outline: 3px solid var(--orange); outline-offset: -3px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 13px; color: var(--muted); font-size: .85rem; }
+    .dot { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+    .svg-wrap { min-width: 520px; text-align: center; }
+    svg { max-width: 100%; height: auto; }
+    .edge { stroke: #b9c6d8; stroke-width: 2; fill: none; }
+    .edge.current { stroke: var(--orange); stroke-width: 4; }
+    .edge.best { stroke: var(--green); stroke-width: 4; }
+    .node { stroke: white; stroke-width: 3; }
+    .node text { fill: white; font-weight: 800; font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+    .explain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-top: 18px; }
+    .step { padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid var(--line); }
+    .step b { color: var(--blue); }
+    code { background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
+    footer { padding: 10px 0 38px; text-align: center; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 720px) {
+      .intro, .explain { grid-template-columns: 1fr; }
+      .card { padding: 17px; }
+      .string-label { width: 58px; font-size: .85rem; }
+      .letter { width: 34px; height: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <h1>Brute Force Algorithm Lab</h1>
+    <p class="lead">Watch each algorithm move one step at a time. Use <b>Step</b> once, or <b>Auto Step</b> to animate clearly.</p>
+    <div class="controls" style="justify-content:center; margin-top:14px;">
+      <div class="field">
+        <label for="stepDelay">Auto step speed</label>
+        <select id="stepDelay">
+          <option value="1200">Slow (1.2s)</option>
+          <option value="800" selected>Normal (0.8s)</option>
+          <option value="450">Fast (0.45s)</option>
+        </select>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Simulations">
+      <button class="tab active" data-tab="string">1. String Matching</button>
+      <button class="tab" data-tab="tsp">2. TSP</button>
+      <button class="tab" data-tab="assignment">3. Job Assignment</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section id="string" class="panel active">
+      <div class="card intro">
+        <div>
+          <h2>Brute Force String Matching</h2>
+          <p class="muted">Align the pattern with every possible position in the text. Compare characters from left to right until the pattern matches or a mismatch occurs.</p>
+        </div>
+        <div class="idea"><b>Core idea:</b><br>Try position 0, then position 1, then position 2... No clever skipping.</div>
+      </div>
+      <div class="card">
+        <div class="controls">
+          <div class="field"><label for="textInput">Text</label><input id="textInput" value="A B A B C A B A" size="22"></div>
+          <div class="field"><label for="patternInput">Pattern</label><input id="patternInput" value="A B A" size="12"></div>
+          <button class="primary" id="stringReset">Reset</button><button class="warning" id="stringStep">Step</button><button class="success" id="stringRun">Auto Step</button><button id="stringPause">Pause</button>
+        </div>
+        <div class="stats"><div class="stat"><strong id="stringPosition">—</strong><span>current alignment</span></div><div class="stat"><strong id="stringComparisons">0</strong><span>character comparisons</span></div><div class="stat"><strong id="stringResult">Not started</strong><span>result</span></div></div>
+        <div class="visual" id="stringVisual"></div>
+        <p class="status" id="stringStatus"></p>
+        <div class="explain"><div class="step"><b>1. Align</b><br>Place the pattern under the next text position.</div><div class="step"><b>2. Compare</b><br>Check each pair of characters.</div><div class="step"><b>3. Shift</b><br>On a mismatch, move right by one position.</div></div>
+      </div>
+    </section>
+
+    <section id="tsp" class="panel">
+      <div class="card intro">
+        <div>
+          <h2>Travelling Salesperson Problem (TSP)</h2>
+          <p class="muted">Start at city A, visit every other city exactly once, return to A, and compare the distance of every possible tour.</p>
+        </div>
+        <div class="idea"><b>Core idea:</b><br>List all tours, calculate every total, and keep the shortest one.</div>
+      </div>
+      <div class="card">
+        <div class="controls">
+          <button class="primary" id="tspReset">Reset</button><button class="warning" id="tspStep">Step</button><button class="success" id="tspRun">Auto Step</button><button id="tspPause">Pause</button>
+        </div>
+        <div class="stats"><div class="stat"><strong id="tspTour">—</strong><span>tour being tested</span></div><div class="stat"><strong id="tspDistance">—</strong><span>current distance</span></div><div class="stat"><strong id="tspBest">—</strong><span>shortest distance</span></div><div class="stat"><strong id="tspCount">0 / 24</strong><span>tours checked</span></div></div>
+        <div class="visual"><div class="svg-wrap"><svg id="tspSvg" viewBox="0 0 620 330" role="img" aria-label="TSP city graph"></svg></div><div class="legend"><span><i class="dot" style="background:#f97316"></i>current tour</span><span><i class="dot" style="background:#16a34a"></i>best tour</span><span><i class="dot" style="background:#2563eb"></i>city</span></div></div>
+        <p class="status" id="tspStatus"></p>
+        <div class="explain"><div class="step"><b>1. Generate</b><br>Permute the cities after the fixed start city A.</div><div class="step"><b>2. Measure</b><br>Add each edge, including the return edge.</div><div class="step"><b>3. Remember</b><br>Keep the tour with the smallest distance.</div></div>
+      </div>
+    </section>
+
+    <section id="assignment" class="panel">
+      <div class="card intro">
+        <div>
+          <h2>Job Assignment Problem</h2>
+          <p class="muted">Assign one worker to each job. The table gives the cost (or time) for each assignment. Brute force checks every possible assignment.</p>
+        </div>
+        <div class="idea"><b>Core idea:</b><br>Try every row-to-column assignment and choose the minimum total cost.</div>
+      </div>
+      <div class="card">
+        <div class="controls">
+          <button class="primary" id="assignmentReset">Reset</button><button class="warning" id="assignmentStep">Step</button><button class="success" id="assignmentRun">Auto Step</button><button id="assignmentPause">Pause</button>
+        </div>
+        <div class="stats"><div class="stat"><strong id="assignmentTry">—</strong><span>assignment being tested</span></div><div class="stat"><strong id="assignmentCost">—</strong><span>current total cost</span></div><div class="stat"><strong id="assignmentBest">—</strong><span>lowest cost</span></div><div class="stat"><strong id="assignmentCount">0 / 6</strong><span>assignments checked</span></div></div>
+        <div class="visual"><div id="assignmentVisual"></div><div class="legend"><span><i class="dot" style="background:#fef3c7"></i>current assignment</span><span><i class="dot" style="background:#dcfce7"></i>best assignment</span></div></div>
+        <p class="status" id="assignmentStatus"></p>
+        <div class="explain"><div class="step"><b>1. Permute</b><br>Choose a different job for each worker.</div><div class="step"><b>2. Add</b><br>Sum the selected cells in the cost table.</div><div class="step"><b>3. Compare</b><br>Save the assignment with the lowest total.</div></div>
+      </div>
+    </section>
+  </main>
+  <footer>Educational simulation • Brute force is easy to understand, but can become slow as the input grows.</footer>
+
+  <script>
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+    const timers = { string: null, tsp: null, assignment: null };
+    function stopAuto(name) {
+      if (timers[name]) { clearInterval(timers[name]); timers[name] = null; }
+    }
+    function stopAllAuto() {
+      stopAuto("string"); stopAuto("tsp"); stopAuto("assignment");
+    }
+    function startAuto(name, stepFn, doneFn) {
+      stopAuto(name);
+      const delay = Number($("stepDelay").value) || 800;
+      timers[name] = setInterval(() => {
+        if (doneFn()) { stopAuto(name); return; }
+        stepFn();
+        if (doneFn()) stopAuto(name);
+      }, delay);
+    }
+    document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === tab.dataset.tab));
+    }));
+
+    function permutations(items) {
+      if (items.length < 2) return [items.slice()];
+      return items.flatMap((item, i) => permutations(items.slice(0, i).concat(items.slice(i + 1))).map((rest) => [item].concat(rest)));
+    }
+
+    const stringState = { align: 0, index: 0, comparisons: 0, done: false, found: -1, text: [], pattern: [] };
+    function stringRead() {
+      stringState.text = $("textInput").value.replace(/\s+/g, "").split("");
+      stringState.pattern = $("patternInput").value.replace(/\s+/g, "").split("");
+    }
+    function stringReset() {
+      stopAuto("string");
+      stringRead(); stringState.align = 0; stringState.index = 0; stringState.comparisons = 0; stringState.done = false; stringState.found = -1; stringRender();
+      $("stringStatus").textContent = "Ready. Click Step or Auto Step.";
+    }
+    function stringRender() {
+      const s = stringState, t = s.text, p = s.pattern;
+      let html = `<div class="string-line"><span class="string-label">Text</span>${t.map((c, i) => `<span class="letter ${i >= s.align && i < s.align + p.length ? "active" : ""} ${s.found >= 0 && i >= s.found && i < s.found + p.length ? "match" : ""}">${c || "?"}</span>`).join("")}</div>`;
+      html += `<div class="string-line"><span class="string-label">Pattern</span>${t.map((_, i) => i < s.align || i >= s.align + p.length ? '<span class="letter" style="visibility:hidden"></span>' : `<span class="letter ${i === s.align + s.index ? (s.done ? "mismatch" : "active") : ""}">${p[i - s.align] || ""}</span>`).join("")}</div>`;
+      $("stringVisual").innerHTML = html;
+      $("stringPosition").textContent = s.done ? (s.found >= 0 ? s.found : "none") : s.align;
+      $("stringComparisons").textContent = s.comparisons;
+      $("stringResult").textContent = s.done ? (s.found >= 0 ? "Found!" : "Not found") : "Searching";
+    }
+    function stringStep() {
+      stopAuto("string");
+      stringStepCore();
+    }
+    function stringStepCore() {
+      const s = stringState, p = s.pattern, t = s.text;
+      if (s.done) return;
+      if (!p.length || !t.length || p.length > t.length) { s.done = true; $("stringStatus").textContent = "Enter a non-empty pattern that fits inside the text."; stringRender(); return; }
+      s.comparisons++;
+      if (t[s.align + s.index] === p[s.index]) {
+        $("stringStatus").textContent = `Pos ${s.align}: ${t[s.align + s.index]} = ${p[s.index]} ✓`;
+        s.index++;
+        if (s.index === p.length) { s.found = s.align; s.done = true; $("stringStatus").textContent = `Found at index ${s.found}.`; }
+      } else {
+        $("stringStatus").textContent = `Pos ${s.align}: mismatch ✗ → shift right`;
+        s.align++; s.index = 0;
+        if (s.align > t.length - p.length) { s.done = true; $("stringStatus").textContent = "No match found."; }
+      }
+      stringRender();
+    }
+    $("stringStep").onclick = stringStep; $("stringReset").onclick = stringReset;
+    $("stringRun").onclick = () => startAuto("string", stringStepCore, () => stringState.done);
+    $("stringPause").onclick = () => stopAuto("string");
+    $("textInput").onchange = stringReset; $("patternInput").onchange = stringReset;
+
+    const city = { A: [310, 45], B: [100, 125], C: [160, 275], D: [460, 275], E: [520, 125] };
+    const tspDistance = { AB: 10, AC: 15, AD: 20, AE: 12, BC: 9, BD: 14, BE: 11, CD: 7, CE: 13, DE: 8 };
+    const tspState = { tours: [], i: -1, best: null, bestDistance: Infinity, currentDistance: null, lastWasBest: false };
+    function distance(a, b) { return tspDistance[a + b] || tspDistance[b + a]; }
+    function routeDistance(route) { return route.reduce((sum, a, i) => sum + distance(a, route[(i + 1) % route.length]), 0); }
+    function tspReset() {
+      stopAuto("tsp");
+      tspState.tours = permutations(["B", "C", "D", "E"]).map((x) => ["A"].concat(x));
+      tspState.i = -1; tspState.best = null; tspState.bestDistance = Infinity; tspState.currentDistance = null; tspState.lastWasBest = false; tspRender();
+    }
+    function tspStep() {
+      stopAuto("tsp");
+      tspStepCore();
+    }
+    function tspStepCore() {
+      if (tspState.i >= tspState.tours.length - 1) return;
+      tspState.i++; const route = tspState.tours[tspState.i]; tspState.currentDistance = routeDistance(route);
+      tspState.lastWasBest = tspState.currentDistance < tspState.bestDistance;
+      if (tspState.lastWasBest) { tspState.bestDistance = tspState.currentDistance; tspState.best = route; }
+      tspRender();
+    }
+    function tspRender() {
+      const s = tspState, current = s.i >= 0 ? s.tours[s.i] : null, svg = $("tspSvg");
+      let html = "";
+      const draw = (route, cls) => { if (!route) return ""; return route.map((a, i) => { const b = route[(i + 1) % route.length]; return `<line class="edge ${cls}" x1="${city[a][0]}" y1="${city[a][1]}" x2="${city[b][0]}" y2="${city[b][1]}"></line>`; }).join(""); };
+      html += draw(s.best, "best"); html += draw(current, "current");
+      Object.entries(city).forEach(([name, [x, y]]) => { html += `<g class="node"><circle cx="${x}" cy="${y}" r="23" fill="#2563eb"></circle><text x="${x}" y="${y}">${name}</text></g>`; });
+      svg.innerHTML = html;
+      $("tspTour").textContent = current ? current.join(" → ") + " → A" : "—";
+      $("tspDistance").textContent = s.currentDistance === null ? "—" : s.currentDistance;
+      $("tspBest").textContent = s.best ? s.bestDistance : "—";
+      $("tspCount").textContent = `${Math.max(0, s.i + 1)} / ${s.tours.length}`;
+      $("tspStatus").textContent = current ? `Tour ${s.i + 1}: cost ${s.currentDistance}${s.lastWasBest ? " (new best ✓)" : ""}` : "Ready. Click Step or Auto Step.";
+    }
+    $("tspStep").onclick = tspStep; $("tspReset").onclick = tspReset;
+    $("tspRun").onclick = () => startAuto("tsp", tspStepCore, () => tspState.i >= tspState.tours.length - 1);
+    $("tspPause").onclick = () => stopAuto("tsp");
+
+    const costs = [[9, 2, 7], [6, 4, 3], [5, 8, 1]];
+    const assignmentState = { options: permutations([0, 1, 2]), i: -1, best: null, bestCost: Infinity, currentCost: null };
+    function assignmentCost(a) { return a.reduce((sum, job, worker) => sum + costs[worker][job], 0); }
+    function assignmentReset() { stopAuto("assignment"); assignmentState.i = -1; assignmentState.best = null; assignmentState.bestCost = Infinity; assignmentState.currentCost = null; assignmentRender(); }
+    function assignmentStep() {
+      stopAuto("assignment");
+      assignmentStepCore();
+    }
+    function assignmentStepCore() {
+      const s = assignmentState; if (s.i >= s.options.length - 1) return;
+      s.i++; s.currentCost = assignmentCost(s.options[s.i]);
+      if (s.currentCost < s.bestCost) { s.bestCost = s.currentCost; s.best = s.options[s.i].slice(); }
+      assignmentRender();
+    }
+    function assignmentRender() {
+      const s = assignmentState, current = s.i >= 0 ? s.options[s.i] : null;
+      let html = '<table class="grid-table"><tr><th>Worker / Job</th><th>Job 1</th><th>Job 2</th><th>Job 3</th></tr>';
+      costs.forEach((row, worker) => { html += `<tr><th>Worker ${worker + 1}</th>` + row.map((cost, job) => {
+        const isCurrent = current && current[worker] === job, isBest = s.best && s.best[worker] === job;
+        return `<td class="${isCurrent ? "try" : ""} ${isBest ? "best" : ""} ${isCurrent && isBest ? "current" : ""}">${cost}</td>`;
+      }).join("") + "</tr>"; }); html += "</table>";
+      $("assignmentVisual").innerHTML = html;
+      $("assignmentTry").textContent = current ? current.map((j, w) => `W${w + 1}→J${j + 1}`).join(", ") : "—";
+      $("assignmentCost").textContent = s.currentCost === null ? "—" : s.currentCost;
+      $("assignmentBest").textContent = s.best ? s.bestCost : "—";
+      $("assignmentCount").textContent = `${Math.max(0, s.i + 1)} / ${s.options.length}`;
+      $("assignmentStatus").textContent = current ? `Try ${s.i + 1}: cost ${s.currentCost}${s.currentCost === s.bestCost ? " (new best ✓)" : ""}` : "Ready. Click Step or Auto Step.";
+    }
+    $("assignmentStep").onclick = assignmentStep; $("assignmentReset").onclick = assignmentReset;
+    $("assignmentRun").onclick = () => startAuto("assignment", assignmentStepCore, () => assignmentState.i >= assignmentState.options.length - 1);
+    $("assignmentPause").onclick = () => stopAuto("assignment");
+    window.addEventListener("beforeunload", stopAllAuto);
+    stringReset(); tspReset(); assignmentReset();
+  </script>
+</body>
+</html>
